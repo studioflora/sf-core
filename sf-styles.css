@@ -134,7 +134,7 @@ a {
 }
 
 p, a {
-    line-height: 1.6em;
+    line-height: 1.25em;
 
     &.s {
         font-size: 0.75rem;
