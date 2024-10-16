@@ -133,9 +133,11 @@ a {
     }
 }
 
-p, a {
-    line-height: 1.25em;
+p {
+    line-height: 1.6em;
+}
 
+p, a {
     &.s {
         font-size: 0.75rem;
     }
@@ -149,11 +151,8 @@ p, a {
     border: var(--border);
 }
 
-h1, h2, h3, h4, h5, h6, p, li, a {
-    line-height: 1.6em;
-}
-
 h1, h2, h3, h4, h5, h6 {
+    line-height: 1.25em;
     font-weight: 600;
 }
 
