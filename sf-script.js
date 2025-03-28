@@ -1,17 +1,19 @@
+console.log('reading js-core');
+
 class Sfignal {
    constructor(value) {
       this._value = value;
       this._subscribers = new Set();
    }
  
-   set value(newValue) {
+   set state(newValue) {
       if (this._value !== newValue) {
          this._value = newValue;
          this._sync();
       }
    }
  
-   get value() {
+   get state() {
       return this._value;
    }
  
