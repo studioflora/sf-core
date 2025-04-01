@@ -1,4 +1,4 @@
-console.log('reading js-core');
+console.log('reading sf-core');
 
 class Sfignal {
    constructor(value) {
@@ -27,19 +27,21 @@ class Sfignal {
    }
 }
  
- /* Usage
- const state = new Sfignal(0);
- 
- const unsubscribe = state.subscribe(value => {
-   console.log('State updated:', value);
- });
- 
- state.value = 1; // Logs: "State updated: 1"
- unsubscribe(); // Stop receiving updates
- state.value = 2; // No logs, since we unsubscribed
- */
+/* Usage
+const myState = new Sfignal(0);
+const unsubscribe = myState.subscribe(value => { console.log(value) }); or just
+myState.subscribe(value => { console.log(value) });
+myState.state = 1;
+unsubscribe();
+*/
 
 let db;
+
+function dbCheckOverwrite(projectName, callback) {
+   const request = db.transaction('projects').objectStore('projects').get(projectName);
+   request.onsuccess = () => callback(!!request.result);
+   request.onerror = () => callback(false);
+}
 
 function initDB() {
    const request = indexedDB.open('ProjectDB', 1);
@@ -86,6 +88,25 @@ function dbStoreProject(projectName, projectData) {
    };
 }
 
+function dbDeleteProject(projectName, onSuccess, onError) {
+   if (!confirm(`Delete "${projectName}"?`)) {
+      return;
+   }
+   const transaction = db.transaction(['projects'], 'readwrite');
+   const store = transaction.objectStore('projects');
+   const request = store.delete(projectName);
+ 
+   request.onsuccess = () => {
+     console.log(`Project "${projectName}" deleted`);
+     if (onSuccess) onSuccess();
+   };
+   
+   request.onerror = () => {
+     console.error(`Error deleting project "${projectName}"`);
+     if (onError) onError();
+   };
+}
+
 function dbRetrieveProjects(callback) {
    if (!db) {
       console.warn('No local projects found.');
@@ -95,9 +116,14 @@ function dbRetrieveProjects(callback) {
    const store = transaction.objectStore('projects');
    const request = store.getAll();
    request.onsuccess = function(event) {
-      const projects = event.target.result;
+      const projects = event.target.result.map(project => ({
+         name: project.name,
+         ...project.data,
+         lastEdit: Date.now()
+      }));
       if (projects && projects.length > 0) {
          console.log('Projects retrieved successfully.');
+         console.log(projects);
          callback(projects);
       } else {
          console.warn('No local projects found.');
